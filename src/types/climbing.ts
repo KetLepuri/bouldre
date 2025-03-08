@@ -1,0 +1,1 @@
+// # Climbing-specific types
