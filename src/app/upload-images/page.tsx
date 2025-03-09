@@ -6,7 +6,7 @@ import { uploadImage } from "@/lib/supabase";
 export default function UploadPage() {
 	const [file, setFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
-	const [imageUrl, setImageUrl] = useState("");
+	const [latestUploads, setLatestUploads] = useState<string[]>([]);
 
 	const handleUpload = async () => {
 		if (!file) {
@@ -18,7 +18,7 @@ export default function UploadPage() {
 
 		try {
 			const { url } = await uploadImage(file);
-			setImageUrl(url);
+			setLatestUploads((prev) => [url, ...prev]); // Update latest uploads list
 		} catch (error) {
 			alert("Upload failed. Check console for details.");
 			console.error("Upload Error:", error);
@@ -40,7 +40,7 @@ export default function UploadPage() {
 				className="mb-4"
 			/>
 
-			{/* biome-ignore lint/a11y/useButtonType: <explanation> */}
+			{/* Upload Button */}
 			<button
 				onClick={handleUpload}
 				disabled={uploading}
@@ -49,12 +49,16 @@ export default function UploadPage() {
 				{uploading ? "Uploading..." : "Upload"}
 			</button>
 
-			{imageUrl && (
-				<img
-					src={imageUrl}
-					alt="Uploaded"
-					className="mt-4 w-64 rounded shadow"
-				/>
+			{/* Latest Uploads */}
+			{latestUploads.length > 0 && (
+				<div className="mt-6">
+					<h2 className="text-xl font-bold mb-2">Latest Uploads</h2>
+					<div className="grid grid-cols-3 gap-4">
+						{latestUploads.map((url, index) => (
+							<img key={index} src={url} alt={`Upload ${index}`} className="w-32 h-32 rounded shadow" />
+						))}
+					</div>
+				</div>
 			)}
 		</div>
 	);
