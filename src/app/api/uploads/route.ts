@@ -13,13 +13,13 @@ export async function POST(req: Request) {
     const fileExt = file.name.split(".").pop();
     const filePath = `uploads/${Date.now()}.${fileExt}`;
 
-    // Convert File to Blob (Fixes Possible TypeError)
+
     const arrayBuffer = await file.arrayBuffer();
     const blob = new Blob([arrayBuffer], { type: file.type });
 
-    // Upload file to Supabase Storage
+
     const { data, error } = await supabase.storage
-      .from("image-uploads") // Ensure bucket name is correct
+      .from("image-uploads")
       .upload(filePath, blob, { contentType: file.type });
 
     if (error) {
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Generate Public URL
+
     const { data: publicUrlData } = supabase.storage.from("image-uploads").getPublicUrl(filePath);
 
     return NextResponse.json({ url: publicUrlData.publicUrl }, { status: 200 });

@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import "./globals.css";
 
+import { Toaster } from "@/components/ui/toaster";
 
-const poppins = Poppins({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-poppins",
-});
+import { poppins } from "@/components/ui/fonts";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+
+
 
 export const metadata: Metadata = {
   title: "Bouldre",
@@ -15,17 +14,26 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning className={`${poppins.variable}`}>
-      <body
-        
-      >
-        {children}
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" suppressHydrationWarning className={`${poppins.variable}`}>
+			<body>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange
+				>
+			
+						<Toaster />
+						{children}
+
+				</ThemeProvider>
+			</body>
+		</html>
+	);
 }
+
