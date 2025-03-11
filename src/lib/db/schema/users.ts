@@ -13,7 +13,7 @@ export const users = pgTable("user", {
 	name: text("name").notNull(),
 	email: text("email").unique(),
 	password: text("password").notNull(),
-	gender: text("gender"),
+	sex: text("sex"), //change to sex
 	apeIndex: real("apeIndex"),
 	height: real("height"),
 	legRatio: real("legRatio"),
