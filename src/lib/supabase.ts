@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Correctly use environment variables for client-side access
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
@@ -8,7 +7,7 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-export async function uploadImage(file: File) {
+export async function uploadImage(file: File, p0: string) {
   try {
     const fileExt = file.name.split(".").pop();
     const filePath = `uploads/${Date.now()}.${fileExt}`;

@@ -43,48 +43,15 @@ export default function RootLayout({
 }: { children: React.ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning className={`${poppins.variable}`}>
-			<head>
-				{/* 🔹 Explicitly set favicon */}
-				<link rel="icon" href="/images/og.png" sizes="1200x1200" />
-				<link rel="shortcut icon" href="/images/icon.png" />
-			</head>
-			<body className="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white">
+			<body>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"
 					enableSystem
 					disableTransitionOnChange
 				>
-					{/* 🔹 Navigation Bar */}
-					<nav className="bg-gray-800 text-white p-4 shadow-lg flex justify-between items-center">
-						<Link href="/" className="font-bold text-lg flex items-center">
-							<img
-								src="/images/icon.png"
-								alt="Bouldre Logo"
-								className="w-6 h-6 mr-2"
-							/>
-							Bouldre
-						</Link>
-						<div className="space-x-4">
-							<Link href="/upload-images" className="hover:underline">
-								Upload
-							</Link>
-							<Link href="/gallery" className="hover:underline">
-								Gallery
-							</Link>
-						</div>
-					</nav>
-
-					{/* 🔹 Page Content */}
-					<main className="container mx-auto p-4 min-h-screen">
-						<Toaster />
-						{children}
-					</main>
-
-					{/* 🔹 Footer */}
-					<footer className="bg-gray-800 text-white text-center p-4">
-						<p>© {new Date().getFullYear()} Bouldre. All rights reserved.</p>
-					</footer>
+					<Toaster />
+					{children}
 				</ThemeProvider>
 			</body>
 		</html>

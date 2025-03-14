@@ -1,6 +1,3 @@
-// biome-ignore lint/style/useNodejsImportProtocol: <explanation>
-import { config } from "process";
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -11,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        border: "rgb(var(--sidebar-border) / <alpha-value>)", // Fix for dynamic colors
+        border: "rgb(var(--sidebar-border) / <alpha-value>)",
         background: "rgb(var(--sidebar) / <alpha-value>)",
         foreground: "rgb(var(--sidebar-foreground) / <alpha-value>)",
       },
@@ -19,5 +16,3 @@ module.exports = {
   },
   plugins: [],
 };
-
-export default config;
