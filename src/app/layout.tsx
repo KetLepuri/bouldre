@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+	metadataBase: new URL("https://bouldre.vercel.app"),
 	title: "Bouldre",
 	description: "Find your way to the top",
 	icons: {
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
 		title: "Bouldre - Find Your Way to the Top",
 		description:
 			"AI-powered climbing route recommendations and climbing hold detection.",
-		images: ["/images/icon.png"],
+		images: ["/images/icon.png"], //
 	},
 };
 
