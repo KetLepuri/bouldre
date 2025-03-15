@@ -36,7 +36,7 @@ export default function UploadPage() {
 		<div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
 			{/* Title */}
 			<h1 className="text-2xl font-semibold text-gray-900 text-center">
-				Upload a Climbing Wall Photo 🧗‍♂️
+				Your Climbing Wall Photo 🧗‍♂️
 			</h1>
 			<p className="text-gray-600 text-center mt-2">
 				Upload or take a photo of the wall you wanna climb.

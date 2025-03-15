@@ -14,44 +14,67 @@ export default function WallImagesPage() {
 	);
 	const [loading, setLoading] = useState(true);
 	const [menuOpen, setMenuOpen] = useState(false);
-	const [inputText, setInputText] = useState("");
 
-	useEffect(() => {
-		async function fetchLatestImage() {
-			const { data, error } = await supabase.storage
-				.from("image-uploads")
-				.list("uploads");
+	// 🔥 Fetch latest image with auto-refresh
+	const fetchLatestImage = async () => {
+		const { data, error } = await supabase.storage
+			.from("image-uploads")
+			.list("uploads", {
+				limit: 100,
+			});
 
-			if (error) {
-				console.error("Error fetching images:", error);
-				setLoading(false);
-				return;
-			}
-
-			if (data.length > 0) {
-				const latestFile = data[data.length - 1];
-				const publicUrl = supabase.storage
-					.from("image-uploads")
-					.getPublicUrl(`uploads/${latestFile.name}`);
-
-				setImage({
-					url: publicUrl.data.publicUrl, // Fixed .data.publicUrl issue
-					name: latestFile.name,
-				});
-			} else {
-				setImage(null);
-			}
-
+		if (error) {
+			console.error("Error fetching images:", error);
 			setLoading(false);
+			return;
 		}
+
+		const validFiles = data.filter(
+			(file) => file.name && !file.name.includes("emptyFolderPlaceholder"),
+		);
+
+		if (validFiles.length > 0) {
+			const latestFile = validFiles[validFiles.length - 1]; // Get the most recent image
+			const publicUrl = supabase.storage
+				.from("image-uploads")
+				.getPublicUrl(`uploads/${latestFile.name}`);
+
+			setImage({
+				url: publicUrl.data.publicUrl, // ✅ Fixed `.data.publicUrl` issue
+				name: latestFile.name,
+			});
+		} else {
+			setImage(null);
+		}
+
+		setLoading(false);
+	};
+
+	// 🛠 Auto-refresh when Supabase updates
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
 		fetchLatestImage();
+		const subscription = supabase
+			.channel("image-uploads")
+			.on(
+				"postgres_changes",
+				{ event: "*", schema: "public", table: "image-uploads" },
+				fetchLatestImage,
+			)
+			.subscribe();
+
+		return () => {
+			supabase.removeChannel(subscription);
+		};
 	}, []);
 
+	// 🗑 Fix Delete Functionality
 	const handleDelete = async () => {
 		if (!image) return;
+
 		const { error } = await supabase.storage
 			.from("image-uploads")
-			.remove([image.name]);
+			.remove([`uploads/${image.name}`]);
 
 		if (error) {
 			console.error("Error deleting image:", error);
@@ -59,11 +82,6 @@ export default function WallImagesPage() {
 		}
 
 		setImage(null);
-		setMenuOpen(false);
-	};
-
-	const handleRename = async () => {
-		alert("Rename functionality will be implemented later.");
 		setMenuOpen(false);
 	};
 
@@ -99,12 +117,6 @@ export default function WallImagesPage() {
 						{menuOpen && (
 							<div className="absolute right-0 mt-2 w-24 bg-white shadow-md rounded-lg text-sm">
 								<Button
-									onClick={handleRename}
-									className="w-full flex items-center justify-center px-3 py-1 hover:bg-gray-200"
-								>
-									<Pencil className="w-5 h-5 text-gray-700" />
-								</Button>
-								<Button
 									onClick={handleDelete}
 									className="w-full flex items-center justify-center px-3 py-1 text-red-500 hover:bg-gray-200"
 								>
@@ -118,16 +130,10 @@ export default function WallImagesPage() {
 						src={image.url}
 						alt="Climbing Wall"
 						width={500}
-						height={256}
-						className="w-full h-64 object-cover rounded-lg mt-2"
-					/>
-
-					<textarea
-						className="mt-4 w-full border rounded-md p-2 text-gray-700 resize-none"
-						rows={3}
-						placeholder="Enter any question or additional info..."
-						value={inputText}
-						onChange={(e) => setInputText(e.target.value)}
+						height={300}
+						style={{ width: "auto", height: "auto" }}
+						className="rounded-lg shadow-md"
+						priority
 					/>
 
 					<Button
