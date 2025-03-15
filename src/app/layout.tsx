@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 		title: "Bouldre - Find Your Way to the Top",
 		description:
 			"AI-powered climbing route recommendations and climbing hold detection.",
-		images: ["/images/icon.png"], //
+		images: ["/images/icon.png"], 
 	},
 };
 
@@ -51,6 +51,7 @@ export default function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
+					
 					<Toaster />
 					{children}
 				</ThemeProvider>

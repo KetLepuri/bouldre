@@ -1,114 +1,54 @@
 "use client";
 
-import {
-	Sidebar,
-	SidebarContent,
-	SidebarFooter,
-	SidebarGroup,
-	SidebarGroupContent,
-	SidebarGroupLabel,
-	SidebarHeader,
-	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
-	SidebarSeparator,
-} from "@/components/ui/sidebar";
-import { Heart, Home } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-const applicationItems = [
-	{
-		title: "Home",
-		url: "/home",
-		icon: Home,
-	},
-	{
-		title: "Gallery",
-		url: "/home/gallery",
-		icon: Heart,
-	},
-];
+import { Menu, X } from "lucide-react";
+import { Button } from "../ui/button";
 
-export function AppSidebar() {
-	const pathname = usePathname();
-	
-	const isActive = (url: string) => {
-		return pathname === url;
-	};
+export default function AppSidebar() {
+	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<Sidebar>
-			<SidebarHeader className="relative rounded-tr-lg">
-				<div className="relative w-full h-full p-9 ">
-					<div className="flex z-20 gap-4">
-						<div className="flex items-center space-x-3 text-foreground relative z-10">
-							<h1 className="text-xl font-semibold text-primary-foreground">
-								Bouldre Portal
-							</h1>
-						</div>
-					</div>
-				</div>
-			</SidebarHeader>
-			<SidebarSeparator />
-			<SidebarGroup>
-				<SidebarGroupLabel className="text-mystical/65 text-xs px-4 py-2 mb-2 font-semibold dark:text-white/40">
-					Application
-				</SidebarGroupLabel>
-				<SidebarGroupContent>
-				<SidebarMenu>
-						{applicationItems.map((item) => (
-									<SidebarMenuItem key={item.title}>
-										<SidebarMenuButton asChild>
-											<Link
-												href={item.url}
-												className={`group/item flex items-center space-x-3 px-4 py-2 cursor-pointer w-full rounded-lg ${
-													isActive(item.url)
-														? "text-royal-purple dark:text-creamy"
-														: "text-mystical dark:text-creamy hover:bg-creamy dark:hover:text-primary"
-												}`}
-												
-											>
-												<span
-													className={`${
-														isActive(item.url)
-															? "text-royal-purple dark:text-primary"
-															: "text-mystical dark:text-creamy group-hover/item:text-royal-purple dark:group-hover/item:text-primary"
-													}`}
-												>
-													<item.icon className="w-5 h-5" />
-												</span>
-												
-											</Link>
-										</SidebarMenuButton>
-									</SidebarMenuItem>
-								))}
-							</SidebarMenu>
-					<SidebarMenu>
-						<SidebarMenuItem>Dashboard</SidebarMenuItem>
-						<SidebarMenuItem>Gallery</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarGroupContent>
-			</SidebarGroup>
-			<SidebarGroup className="mt-20">
-				<SidebarGroupLabel className="text-mystical/65 text-xs px-4 py-2 mb-2 font-semibold dark:text-white/40">
-					Settings
-				</SidebarGroupLabel>
-				<SidebarGroupContent>
-					<SidebarMenu>
-						<SidebarMenuItem>FAQ</SidebarMenuItem>
-						<SidebarMenuItem>About</SidebarMenuItem>
-						<SidebarMenuItem>Prefences</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarGroupContent>
-			</SidebarGroup>
-			<div className="py-3 px-3">
-				<SidebarSeparator />
+		<>
+			{/* Hamburger Button */}
+			<Button
+				onClick={() => setIsOpen(!isOpen)}
+				className="absolute top-4 left-4 z-50 p-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+			>
+				{isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+			</Button>
+
+			{/* Sidebar Panel */}
+			<div
+				className={`fixed left-0 top-0 h-full w-64 bg-gray-900 text-white p-6 transition-transform ${
+					isOpen ? "translate-x-0" : "-translate-x-full"
+				}`}
+			>
+				<h2 className="text-xl font-semibold mb-4">Menu</h2>
+				<ul className="space-y-4">
+					<li>
+						<Link
+							href="/home/upload-images"
+							className="block hover:text-gray-300"
+						>
+							Upload Image
+						</Link>
+					</li>
+					<li>
+						<Link
+							href="/home/wall-images"
+							className="block hover:text-gray-300"
+						>
+							My Climbing Walls
+						</Link>
+					</li>
+					<li>
+						<Link href="/home/profile" className="block hover:text-gray-300">
+							Profile
+						</Link>
+					</li>
+				</ul>
 			</div>
-			<SidebarFooter className="p-6 mb-4">
-				<SidebarGroupLabel className="text-mystical/65 text-xs px-2 py-2 font-semibold dark:text-white/40">
-					Profile
-				</SidebarGroupLabel>
-			</SidebarFooter>
-		</Sidebar>
+		</>
 	);
 }

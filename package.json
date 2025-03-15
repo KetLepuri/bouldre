@@ -15,6 +15,7 @@
     "@auth/drizzle-adapter": "^1.8.0",
     "@esbuild-kit/core-utils": "^3.3.2",
     "@esbuild-kit/esm-loader": "^2.6.5",
+    "@neondatabase/serverless": "^0.10.4",
     "@pinecone-database/pinecone": "^5.1.1",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-avatar": "^1.1.3",

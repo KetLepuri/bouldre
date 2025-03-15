@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { uploadImage } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { Camera, UploadCloud, Loader2 } from "lucide-react";
+import { Camera, UploadCloud, Loader2, Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import UserProfile from "@/components/layout/user-profile";
+import Sidebar from "@/components/layout/sidebar";
+import AppSidebar from "@/components/layout/sidebar";
 
 export default function UploadPage() {
 	const router = useRouter();
@@ -34,6 +37,16 @@ export default function UploadPage() {
 
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+			{/* Header */}
+			<div className="absolute top-4 w-full flex justify-between  bg-gray-200">
+			<div className="absolute top-2 left-4">
+				<AppSidebar />
+			</div>
+			<div className="absolute top-2 right-4">
+				<UserProfile />
+			</div>
+			</div>
+
 			{/* Title */}
 			<h1 className="text-2xl font-semibold text-gray-900 text-center">
 				Your Climbing Wall Photo 🧗‍♂️
@@ -50,6 +63,7 @@ export default function UploadPage() {
 						alt="Uploaded Image"
 						width={300}
 						height={300}
+						style={{ width: "auto", height: "auto" }}
 						className="w-full h-40 object-cover rounded-lg shadow-md"
 					/>
 				) : (
@@ -64,6 +78,7 @@ export default function UploadPage() {
 						accept="image/*"
 						onChange={(e) => setFile(e.target.files?.[0] || null)}
 						className="hidden"
+						style={{ width: "auto", height: "auto" }}
 					/>
 				</label>
 			</div>
@@ -79,7 +94,7 @@ export default function UploadPage() {
 					className="hidden"
 					onChange={(e) => setFile(e.target.files?.[0] || null)}
 				/>
-				<div className="w-full flex items-center justify-center bg-orange-600 hover:bg-orange-500 text-white p-3 rounded-lg cursor-pointer transition">
+				<div className="w-full flex items-center justify-center bg-orange-600 hover:bg-orange-500 text-white p-2 rounded-lg cursor-pointer transition">
 					<Camera className="w-5 h-5 mr-2" />
 					Open Camera & Take Photo
 				</div>
@@ -89,7 +104,7 @@ export default function UploadPage() {
 			<Button
 				onClick={handleUpload}
 				disabled={!file || uploading}
-				className={`w-60 max-w-sm mt-6 p-3 text-white font-bold rounded-lg ${
+				className={`w-50 max-w-sm mt-4 p-2 text-white font-bold rounded-lg ${
 					file
 						? "bg-purple-700 hover:bg-purple-500"
 						: "bg-gray-300 cursor-not-allowed"
@@ -106,7 +121,7 @@ export default function UploadPage() {
 			<Button
 				onClick={() => router.push("/home/wall-images")}
 				disabled={!imageUrl}
-				className={`w-40 max-w-sm mt-4 p-3 text-white font-bold rounded-lg ${
+				className={`w-40 max-w-sm mt-4 p-2 text-white font-bold rounded-lg ${
 					imageUrl
 						? "bg-green-700 hover:bg-green-500"
 						: "bg-gray-300 cursor-not-allowed"
