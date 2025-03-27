@@ -1,2 +1,2 @@
-export * from "./users";
-export * from "./boulderWall";
+export * from "./user";
+export * from "./boulder_wall";

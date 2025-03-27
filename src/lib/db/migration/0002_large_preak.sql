@@ -1,0 +1,1 @@
+ALTER TABLE "boulder_wall" DROP COLUMN "description";

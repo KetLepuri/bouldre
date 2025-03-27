@@ -1,37 +1,28 @@
-import  db  from "@/lib/db";
-import { users } from "@/lib/db/schema/users";
+import db from "@/lib/db";
+import { users } from "@/lib/db/schema/user";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// Get all users
-export async function GET() {
-	try {
-		const result = await db.select().from(users);
-		return NextResponse.json(result, { status: 200 });
-	} catch (error) {
-		console.error("GET Error:", error);
-		return NextResponse.json(
-			{ error: "Internal Server Error" },
-			{ status: 500 },
-		);
-	}
-}
-
-// Create a new user
 export async function POST(req: Request) {
 	try {
-		const { name, email, password } = await req.json();
+		const { name, email, password, sex, apeIndex, height, legRatio } =
+			await req.json();
 
 		const newUser = await db
 			.insert(users)
 			.values({
 				name,
+				// age, // Removed as it is not declared or initialized
 				email,
 				password,
+				sex,
+				apeIndex: Number.parseFloat(apeIndex),
+				height: Number.parseFloat(height),
+				legRatio: Number.parseFloat(legRatio),
 			})
-			.returning();
+			.returning({ id: users.id });
 
-		return NextResponse.json(newUser, { status: 201 });
+		return NextResponse.json({ id: newUser[0].id }, { status: 201 });
 	} catch (error) {
 		console.error("POST Error:", error);
 		return NextResponse.json(
@@ -41,37 +32,18 @@ export async function POST(req: Request) {
 	}
 }
 
-// Update an existing user
-export async function PUT(req: Request) {
+export async function GET(req: Request) {
 	try {
-		const { id, name, email } = await req.json();
+		const url = new URL(req.url);
+		const userId = url.searchParams.get("id");
 
-		const updatedUser = await db
-			.update(users)
-			.set({ name, email })
-			.where(eq(users.id, id)) // ✅ FIXED: Use `eq(users.id, id)`
-			.returning();
+		if (!userId)
+			return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
 
-		return NextResponse.json(updatedUser, { status: 200 });
+		const result = await db.select().from(users).where(eq(users.id, userId));
+		return NextResponse.json(result[0] || {}, { status: 200 });
 	} catch (error) {
-		console.error("PUT Error:", error);
-		return NextResponse.json(
-			{ error: "Internal Server Error" },
-			{ status: 500 },
-		);
-	}
-}
-
-// Delete a user
-export async function DELETE(req: Request) {
-	try {
-		const { id } = await req.json();
-
-		await db.delete(users).where(eq(users.id, id)); // ✅ FIXED: Use `eq(users.id, id)`
-
-		return NextResponse.json({ message: "User deleted" }, { status: 200 });
-	} catch (error) {
-		console.error("DELETE Error:", error);
+		console.error("GET Error:", error);
 		return NextResponse.json(
 			{ error: "Internal Server Error" },
 			{ status: 500 },

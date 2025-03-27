@@ -13,7 +13,7 @@ export default function AppSidebar() {
 			{/* Hamburger Button */}
 			<Button
 				onClick={() => setIsOpen(!isOpen)}
-				className="absolute top-4 left-4 z-50 p-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+				className="absolute top-4 left-4 z-50 p-2 rounded-lg bg-gradient-to-b from-orange-100 to-purple-300 text-white"
 			>
 				{isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
 			</Button>
