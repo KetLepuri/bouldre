@@ -1,53 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function AppSidebar() {
+export default function Sidebar() {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
 		<>
-			{/* Hamburger Button */}
+			{/* Toggle Button */}
 			<Button
 				onClick={() => setIsOpen(!isOpen)}
-				className="absolute top-4 left-4 z-50 p-2 rounded-lg bg-gradient-to-b from-orange-100 to-purple-300 text-white"
+				className="w-12 h-12 p-0 flex items-center justify-center rounded-lg bg-white text-[#FA8420] shadow-md"
 			>
-				{isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+				{isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
 			</Button>
 
-			{/* Sidebar Panel */}
+			{/* Sliding Sidebar */}
 			<div
-				className={`fixed left-0 top-0 h-full w-64 bg-gray-900 text-white p-6 transition-transform ${
+				className={`fixed top-0 left-0 h-full w-64 bg-white z-50 shadow-lg transition-transform duration-300 ${
 					isOpen ? "translate-x-0" : "-translate-x-full"
 				}`}
 			>
-				<h2 className="text-xl font-semibold mb-4">Menu</h2>
-				<ul className="space-y-4">
-					<li>
-						<Link
-							href="/home/upload-images"
-							className="block hover:text-gray-300"
-						>
-							Upload Image
-						</Link>
-					</li>
-					<li>
-						<Link
-							href="/home/wall-images"
-							className="block hover:text-gray-300"
-						>
-							My Climbing Walls
-						</Link>
-					</li>
-					<li>
-						<Link href="/home/profile" className="block hover:text-gray-300">
-							Profile
-						</Link>
-					</li>
-				</ul>
+				<div className="p-6 space-y-4 text-[#7888A3]">
+					<h2 className="text-lg font-semibold">Navigation</h2>
+					<ul className="space-y-2">
+						<li>
+							<Link href="/home/upload-images">Upload Image</Link>
+						</li>
+						<li>
+							<Link href="/home/wall-images">My Climbing Walls</Link>
+						</li>
+						<li>
+							<Link href="/home/profile">Profile</Link>
+						</li>
+					</ul>
+				</div>
 			</div>
 		</>
 	);

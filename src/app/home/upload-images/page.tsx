@@ -3,132 +3,103 @@
 import { useState } from "react";
 import { uploadImage } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { Camera, UploadCloud, Loader2, Menu, User } from "lucide-react";
+import { Camera, UploadCloud, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Sidebar from "@/components/layout/sidebar";
-import AppSidebar from "@/components/layout/sidebar";
 import UserProfile from "../profile/page";
 
 export default function UploadPage() {
 	const router = useRouter();
-	const [file, setFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
 	const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-	const handleUpload = async () => {
-		if (!file) {
-			alert("Please select or take a photo.");
-			return;
-		}
-
+	const handleFileChange = async (file: File | null) => {
+		if (!file) return;
 		setUploading(true);
-
 		try {
 			const { url } = await uploadImage(file, "wall-images");
 			setImageUrl(url);
 		} catch (error) {
-			alert("Upload failed. Check console for details.");
 			console.error("Upload Error:", error);
+			alert("Upload failed. Please try again.");
 		}
-
 		setUploading(false);
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-			{/* Header */}
-			<div className="absolute top-4 w-full flex justify-between  bg-gray-200">
-			<div className="absolute top-2 left-4">
-				<AppSidebar />
+		<div className="flex min-h-screen items-center justify-center bg-[#F3EDE9] px-4 py-8">
+			<div className="absolute top-4 left-4 z-50">
+				<Sidebar />
 			</div>
-			<div className="absolute top-2 right-4">
+			<div className="absolute top-4 right-4">
 				<UserProfile />
 			</div>
-			</div>
 
-			{/* Title */}
-			<h1 className="text-2xl font-semibold text-gray-900 text-center">
-				Your Climbing Wall Photo 🧗‍♂️
-			</h1>
-			<p className="text-gray-600 text-center mt-2">
-				Upload or take a photo of the wall you wanna climb.
-			</p>
+			<div className="bg-white rounded-2xl shadow-lg p-15 w-full max-w-md text-center">
+				<h1 className="text-2xl font-bold text-[#7888A3] mb-2">
+					Upload or take a photo of the wall you wanna climb 🧗‍♀️
+				</h1>
+				<p className="text-[#7888A3] mb-4 text-sm">
+					Just one clear shot of the climbing wall, please.
+				</p>
 
-			{/* File Upload Section */}
-			<div className="relative w-full max-w-sm border-2 border-gray-300 border-dashed rounded-lg p-6 flex flex-col items-center justify-center mt-6">
-				{imageUrl ? (
-					<Image
-						src={imageUrl}
-						alt="Uploaded Image"
-						width={300}
-						height={300}
-						style={{ width: "auto", height: "auto" }}
-						className="w-full h-40 object-cover rounded-lg shadow-md"
-					/>
-				) : (
-					<>
-						<UploadCloud className="w-10 h-10 text-gray-400" />
-						<p className="text-gray-500 mt-2">Select a file</p>
-					</>
-				)}
-				<label className="absolute inset-0 w-full h-full cursor-pointer">
+				<div className="relative w-full h-48 border-2 border-dashed border-[#93C7E7] rounded-xl flex items-center justify-center mb-4">
+					{uploading ? (
+						<Loader2 className="w-8 h-8 text-[#93C7E7] animate-spin" />
+					) : imageUrl ? (
+						<Image
+							src={imageUrl}
+							alt="Uploaded Image"
+							fill
+							className="object-cover rounded-xl"
+							priority
+						/>
+					) : (
+						<div className="text-center text-[#93C7E7]">
+							<UploadCloud className="w-8 h-8 mx-auto mb-2" />
+							<p>Select a file</p>
+						</div>
+					)}
+					<label className="absolute inset-0 cursor-pointer">
+						<input
+							type="file"
+							accept="image/*"
+							onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+							className="hidden"
+						/>
+					</label>
+				</div>
+
+				<p className="text-[#7888A3] mb-4">or</p>
+
+				<label className="block w-full mb-4 cursor-pointer">
 					<input
 						type="file"
 						accept="image/*"
-						onChange={(e) => setFile(e.target.files?.[0] || null)}
+						capture="environment"
+						onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
 						className="hidden"
-						style={{ width: "auto", height: "auto" }}
 					/>
+					<div className="w-full flex items-center justify-center bg-[#93C7E7] hover:bg-[#7db4db] text-white p-3 rounded-lg font-medium shadow-md">
+						<Camera className="w-5 h-5 mr-2" />
+						Take Photo
+					</div>
 				</label>
+
+				<Button
+					onClick={() => router.push("/home/wall-images")}
+					disabled={!imageUrl || uploading}
+					className={`w-full mt-2 p-3 font-semibold rounded-lg flex items-center justify-center shadow-md ${
+						imageUrl && !uploading
+							? "bg-[#FA8420] hover:bg-[#e26e12] text-white"
+							: "bg-gray-300 text-white cursor-not-allowed"
+					}`}
+				>
+					<span>Continue</span>
+					<ArrowRight className="w-5 h-5 ml-2" />
+				</Button>
 			</div>
-
-			<p className="text-gray-500 my-4">or</p>
-
-			{/* Camera Capture Button */}
-			<label className="w-full max-w-sm">
-				<input
-					type="file"
-					accept="image/*"
-					capture="environment"
-					className="hidden"
-					onChange={(e) => setFile(e.target.files?.[0] || null)}
-				/>
-				<div className="w-full flex items-center justify-center  bg-gradient-to-b from-orange-100 to-purple-300 text-white p-2 rounded-lg cursor-pointer transition">
-					<Camera className="w-5 h-5 mr-2" />
-					Open Camera & Take Photo
-				</div>
-			</label>
-
-			{/* Upload Button */}
-			<Button
-				onClick={handleUpload}
-				disabled={!file || uploading}
-				className={`w-50 max-w-sm mt-4 p-2 text-white font-bold rounded-lg ${
-					file
-						? " bg-gradient-to-b from-orange-100 to-purple-300"
-						: "bg-gray-300 cursor-not-allowed"
-				}`}
-			>
-				{uploading ? (
-					<Loader2 className="animate-spin w-5 h-5 mr-2" />
-				) : (
-					"Upload"
-				)}
-			</Button>
-
-			{/* Continue Button */}
-			<Button
-				onClick={() => router.push("/home/wall-images")}
-				disabled={!imageUrl}
-				className={`w-40 max-w-sm mt-4 p-2 text-white font-bold rounded-lg ${
-					imageUrl
-						? "bg-green-700 hover:bg-green-500"
-						: "bg-gray-300 cursor-not-allowed"
-				}`}
-			>
-				Continue
-			</Button>
 		</div>
 	);
 }

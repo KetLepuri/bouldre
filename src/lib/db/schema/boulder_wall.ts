@@ -10,6 +10,7 @@ export const boulderWall = pgTable("boulder_wall", {
 	holdFootNumber: integer("holdFootNumber"),
 	holdType: text("holdType"),
 	wallInclination: text("wallInclination"),
+	image_url: text("image_url").notNull(),
 	created_at: timestamp("created_at").defaultNow(),
 	user_id: text("user_id").references(() => users.id),
 }); 

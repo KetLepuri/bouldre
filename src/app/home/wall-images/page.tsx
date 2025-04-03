@@ -14,47 +14,29 @@ export default function WallImagesPage() {
 	);
 	const [loading, setLoading] = useState(true);
 	const [menuOpen, setMenuOpen] = useState(false);
-	const [formData, setFormData] = useState({
-		name: "",
-		width: "",
-		height: "",
-		holdHandNumber: "",
-		holdFootNumber: "",
-		holdType: "",
-		wallInclination: "",
-	});
-	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [generating, setGenerating] = useState(false);
 
 	const fetchLatestImage = async () => {
 		const { data, error } = await supabase.storage
 			.from("image-uploads")
 			.list("uploads", { limit: 100 });
-
 		if (error) {
 			console.error("Error fetching images:", error);
 			setLoading(false);
 			return;
 		}
-
 		const validFiles = data.filter(
 			(file) => file.name && !file.name.includes(".emptyFolderPlaceholder"),
 		);
-
 		if (validFiles.length > 0) {
 			const latestFile = validFiles[validFiles.length - 1];
 			const publicUrl = supabase.storage
 				.from("image-uploads")
 				.getPublicUrl(`uploads/${latestFile.name}`);
-
-			setImage({
-				url: publicUrl.data.publicUrl,
-				name: latestFile.name,
-			});
+			setImage({ url: publicUrl.data.publicUrl, name: latestFile.name });
 		} else {
 			setImage(null);
 		}
-
 		setLoading(false);
 	};
 
@@ -63,61 +45,15 @@ export default function WallImagesPage() {
 		fetchLatestImage();
 	}, []);
 
-	const handleChange = (
-		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-	) => {
-		setFormData({ ...formData, [e.target.name]: e.target.value });
-	};
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-
-		const userId = localStorage.getItem("userId");
-		if (!userId) {
-			alert("User ID not found. Please log in again.");
-			return;
-		}
-
-		const wallId = `wall-${Date.now()}`; // ✅ Create wall ID
-
-		const payload = {
-			id: wallId, // ✅ include it
-			...formData,
-			user_id: userId,
-			created_at: new Date(),
-		};
-
-		const res = await fetch("/api/wall-details", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(payload),
-		});
-
-		if (res.ok) {
-			setIsSubmitted(true);
-			localStorage.setItem("wallId", wallId); // ✅ store for next step
-			alert("Wall details saved successfully!");
-		} else {
-			const errorData = await res.json();
-			alert(
-				`Failed to save wall details: ${errorData.error || "Unknown error"}`,
-			);
-		}
-	};
-
-	// 🗑 Handle Delete Image
 	const handleDelete = async () => {
 		if (!image) return;
-
 		const { error } = await supabase.storage
 			.from("image-uploads")
 			.remove([`uploads/${image.name}`]);
-
 		if (error) {
 			console.error("Error deleting image:", error);
 			return;
 		}
-
 		setImage(null);
 		setMenuOpen(false);
 	};
@@ -125,70 +61,73 @@ export default function WallImagesPage() {
 	const handleGeneratePath = async () => {
 		if (!image) return;
 		setGenerating(true);
-
 		try {
 			const userId = localStorage.getItem("userId");
-			const wallId = localStorage.getItem("wallId");
-
+			const wallId = `wall-${crypto.randomUUID()}`;
+			localStorage.setItem("wallId", wallId);
 			if (!userId || !wallId) {
 				alert("User ID or Wall ID not found. Please complete all steps.");
 				setGenerating(false);
 				return;
 			}
-
-			//  1. DOWNLOAD IMAGE FILE AND SEND TO PYTHON
-			const imageRes = await fetch(image.url);
-			const imageBlob = await imageRes.blob();
 			const formData = new FormData();
-			formData.append("file", imageBlob, image.name);
-
+			formData.append("image_url", image.url);
+			formData.append("wall_id", wallId);
+			formData.append("user_id", userId);
 			const detectRes = await fetch("http://localhost:8000/detect/", {
 				method: "POST",
-				body: new URLSearchParams({
-				  image_url: image.url,
-				}),
-			  });
-
-			const holdData = await detectRes.json();
-			console.log(" Detected holds from Python:", holdData);
-
-			if (!detectRes.ok || !holdData.holds?.length) {
-				throw new Error("No holds detected in the image.");
+				body: formData,
+			});
+			const { holds, meta, message, error } = await detectRes.json();
+			if (!detectRes.ok || !holds?.length) {
+				console.error("Detection error:", error || message);
+				alert("Hold detection failed. Make sure the image is clear.");
+				setGenerating(false);
+				return;
 			}
-
-			//  2. STORE HOLDS IN PINECONE VIA NEXT.JS API
-			const storeRes = await fetch("/api/store-holds", {
+			const formattedMeta = {
+				id: wallId,
+				name: `Auto Wall ${wallId.slice(-4)}`,
+				width: Number(meta.width),
+				height: Number(meta.height),
+				holdHandNumber: Number(meta.handholds),
+				holdFootNumber: Number(meta.footholds),
+				holdType: "auto-detected",
+				wallInclination: meta.wallInclination || "unknown",
+				image_url: meta.image_url,
+				user_id: userId,
+				created_at: new Date(),
+			};
+			const saveWallRes = await fetch("/api/wall-details", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ userId, wallId, holds: holdData.holds }),
+				body: JSON.stringify(formattedMeta),
 			});
-			if (!storeRes.ok) {
-				throw new Error("Failed to store holds.");
+			if (!saveWallRes.ok) {
+				const errData = await saveWallRes.json();
+				console.error("Wall save failed:", errData.error);
+				alert("Wall metadata save failed.");
+				setGenerating(false);
+				return;
 			}
-
-			await new Promise((resolve) => setTimeout(resolve, 1500));
-
 			const userParams = JSON.parse(localStorage.getItem("userParams") || "{}");
-
 			const generateRes = await fetch("/api/generate-path", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ userId, wallId, userParams }),
 			});
-
 			const pathData = await generateRes.json();
-			console.log(" Generated path:", pathData);
-
-			if (generateRes.ok) {
-				localStorage.setItem("aiGeneratedPath", JSON.stringify(pathData));
-				router.push(
-					`/home/path-images?imageUrl=${encodeURIComponent(image.url)}`,
-				);
-			} else {
-				alert(pathData.error || "Failed to generate path.");
+			if (!generateRes.ok || !pathData.route?.length) {
+				alert(pathData.error || "Failed to generate climbing path.");
+				setGenerating(false);
+				return;
 			}
+			localStorage.setItem("aiGeneratedPath", JSON.stringify(pathData));
+			router.push(
+				`/home/path-images?imageUrl=${encodeURIComponent(image.url)}`,
+			);
 		} catch (error) {
-			console.error(" Error generating path:", error);
+			console.error("Error generating path:", error);
 			alert("Something went wrong. Please try again.");
 		} finally {
 			setGenerating(false);
@@ -196,38 +135,34 @@ export default function WallImagesPage() {
 	};
 
 	return (
-		<div className="flex flex-col items-center min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
-			{/* Back Button */}
+		<div className="flex flex-col items-center min-h-screen bg-[#F3EDE9] p-4 sm:p-6 md:p-8">
 			<Button
 				onClick={() => router.back()}
-				className="absolute top-4 left-4 text-gray-700"
+				className="absolute top-4 left-4 text-[#FA8420]"
 			>
 				<ArrowLeft className="w-6 h-6" />
 			</Button>
-
-			<h1 className="text-lg sm:text-xl font-bold text-gray-900 text-center mt-10">
+			<h1 className="text-lg sm:text-xl font-bold text-[#7888A3] text-center mt-10">
 				Uploaded Climbing Wall
 			</h1>
-
 			{loading ? (
 				<div className="flex items-center justify-center mt-6">
-					<Loader2 className="animate-spin w-6 h-6 text-purple-600" />
+					<Loader2 className="animate-spin w-6 h-6 text-[#93C7E7]" />
 				</div>
 			) : image ? (
 				<div className="mt-6 flex flex-col items-center w-full max-w-md bg-white p-4 rounded-lg shadow-lg">
-					{/* Image & Menu */}
 					<div className="relative w-full flex justify-between items-center">
-						<p className="text-gray-600 font-semibold text-sm sm:text-base">
+						<p className="text-[#7888A3] font-semibold text-sm sm:text-base">
 							{image.name}
 						</p>
 						<Button
 							onClick={() => setMenuOpen(!menuOpen)}
-							className="text-gray-700"
+							className="text-[#FA8420]"
 						>
 							<MoreVertical className="w-5 h-5" />
 						</Button>
 						{menuOpen && (
-							<div className="absolute right-0 mt-2 w-24 bg-white shadow-md rounded-lg text-sm">
+							<div className="absolute right-0 mt-2 w-24 bg-white shadow-md rounded-lg text-sm z-10">
 								<Button
 									onClick={handleDelete}
 									className="w-full flex items-center justify-center px-3 py-1 text-red-500 hover:bg-gray-200"
@@ -237,95 +172,26 @@ export default function WallImagesPage() {
 							</div>
 						)}
 					</div>
-					{/* Adjust image width for mobile */}
 					<Image
 						src={image.url}
 						alt="Climbing Wall"
-						width={500}
-						height={300}
+						width={900}
+						height={800}
 						className="rounded-lg shadow-md w-full max-w-[300px] sm:max-w-[400px]"
 						priority
 					/>
-					Wall Details Form
-					{!isSubmitted ? (
-						<form onSubmit={handleSubmit} className="mt-4 w-full">
-							<input
-								type="text"
-								name="name"
-								placeholder="Wall Name"
-								required
-								onChange={handleChange}
-								className="w-full p-2 border rounded mb-2 text-sm"
-							/>
-							<input
-								type="number"
-								name="width"
-								placeholder="Width (cm)"
-								required
-								onChange={handleChange}
-								className="w-full p-2 border rounded mb-2 text-sm"
-							/>
-							<input
-								type="number"
-								name="height"
-								placeholder="Height (cm)"
-								required
-								onChange={handleChange}
-								className="w-full p-2 border rounded mb-2 text-sm"
-							/>
-							<input
-								type="number"
-								name="holdHandNumber"
-								placeholder="Hand Holds"
-								required
-								onChange={handleChange}
-								className="w-full p-2 border rounded mb-2 text-sm"
-							/>
-							<input
-								type="number"
-								name="holdFootNumber"
-								placeholder="Foot Holds"
-								required
-								onChange={handleChange}
-								className="w-full p-2 border rounded mb-2 text-sm"
-							/>
-							<input
-								type="text"
-								name="holdType"
-								placeholder="Hold Types"
-								required
-								onChange={handleChange}
-								className="w-full p-2 border rounded mb-2 text-sm"
-							/>
-							<input
-								type="text"
-								name="wallInclination"
-								placeholder="Wall Inclination (°)"
-								required
-								onChange={handleChange}
-								className="w-full p-2 border rounded mb-2 text-sm"
-							/>
-							<Button
-								type="submit"
-								className="w-full bg-blue-600 text-white p-2 rounded text-sm"
-							>
-								Save Wall Details
-							</Button>
-						</form>
-					) : (
-						<Button
-							size="lg"
-							variant="default"
-							className="w-full bg-green-700 hover:bg-green-500 text-white mt-4"
-							onClick={handleGeneratePath}
-							disabled={generating}
-						>
-							{generating ? "Generating Path..." : "Generate your path"}
-						</Button>
-					)}
+					<Button
+						size="lg"
+						variant="default"
+						className="w-full bg-[#93C7E7] hover:bg-[#7db4db] text-white mt-4"
+						onClick={handleGeneratePath}
+						disabled={generating}
+					>
+						{generating ? "Generating Path..." : "Generate your path"}
+					</Button>
 				</div>
 			) : (
-				<p className="text-gray-500 mt-6">No uploaded images found.</p>
+				<p className="text-[#7888A3] mt-6">No uploaded images found.</p>
 			)}
 		</div>
 	);

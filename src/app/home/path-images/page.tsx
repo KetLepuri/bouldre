@@ -18,7 +18,6 @@ export default function PathDisplayPage() {
 	const [overlaySvg, setOverlaySvg] = useState("");
 	const [instructions, setInstructions] = useState("");
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (!imageUrl || !userId) return;
 
@@ -26,7 +25,7 @@ export default function PathDisplayPage() {
 			try {
 				setLoading(true);
 
-				// Step 1: Get AI-generated route
+				// Step 1: Generate climbing path
 				const pathRes = await fetch("/api/generate-path", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -38,19 +37,21 @@ export default function PathDisplayPage() {
 					throw new Error(pathData.error || "No route could be generated.");
 				}
 
-				console.log("AI-Generated Route:", pathData.route);
 				setRoute(pathData.route);
 				setInstructions(pathData.instructions);
 
-				// Step 2: Overlay path on image
+				// Step 2: Generate SVG overlay
 				const overlayRes = await fetch("/api/overlay-path", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ imageUrl, route: pathData.route }),
+					body: JSON.stringify({
+						imageUrl,
+						route: pathData.route,
+						allHolds: pathData.allHolds,
+					}),
 				});
 
 				const overlayData = await overlayRes.json();
-				console.log("Overlay SVG:", overlayData.overlaySvg);
 				setOverlaySvg(overlayData.overlaySvg);
 			} catch (err) {
 				console.error("Error generating path:", err);
@@ -63,7 +64,7 @@ export default function PathDisplayPage() {
 		};
 
 		processImage();
-	}, [imageUrl, userId]);
+	}, [imageUrl, userId, wallId]);
 
 	return (
 		<div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
@@ -77,27 +78,27 @@ export default function PathDisplayPage() {
 				</div>
 			) : (
 				<>
-					{/* Image container with SVG overlay */}
-					<div className="relative w-[500px] h-auto">
+					{/* ✅ Image and SVG Container (responsive) */}
+					<div className="relative w-full max-w-[500px] aspect-[3/4] my-6">
 						{imageUrl && (
 							<Image
 								src={imageUrl}
-								alt="Climbing Route"
-								width={500}
-								height={500}
-								className="rounded-lg shadow-md my-6"
+								alt="Climbing Wall"
+								fill
+								className="object-contain rounded-lg shadow-md"
+								priority
 							/>
 						)}
 						{overlaySvg && (
 							<div
-								// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-								dangerouslySetInnerHTML={{ __html: overlaySvg }}
 								className="absolute top-0 left-0 w-full h-full pointer-events-none"
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: <reason>
+								dangerouslySetInnerHTML={{ __html: overlaySvg }}
 							/>
 						)}
 					</div>
 
-					{/* Climbing Instructions with Scrollable Box */}
+					{/* Instructions Box */}
 					<div className="bg-white p-4 rounded-lg shadow-md w-full max-w-lg max-h-[300px] overflow-y-auto">
 						<h2 className="text-lg font-semibold mb-2">
 							Climbing Instructions:
@@ -107,6 +108,7 @@ export default function PathDisplayPage() {
 						</pre>
 					</div>
 
+					{/* Action Buttons */}
 					<div className="mt-6 flex gap-4">
 						<Button
 							variant="default"

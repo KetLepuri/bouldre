@@ -1,0 +1,1 @@
+ALTER TABLE "boulder_wall" ADD COLUMN "image_url" text NOT NULL;
