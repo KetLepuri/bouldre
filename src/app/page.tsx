@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { LoginForm } from "@/components/auth/login-form";
-import { SignUpForm } from "@/components/auth/sign-up-form"; 
+import { SignUpForm } from "@/components/auth/sign-up-form";
+import Link from "next/link";
 
 export default function HomePage() {
 	const [mode, setMode] = useState<"welcome" | "login" | "signup">("welcome");
@@ -26,14 +27,20 @@ export default function HomePage() {
 							Welcome to Bouldre, Your AI-Powered Climbing Path Finder
 						</h1>
 
-						<Button
+						{/* <Button
 							size="lg"
 							type="button"
 							className="w-full bg-[#FA8420] text-[#F3EDE9]"
 							onClick={() => setMode("login")}
 						>
 							Log in
-						</Button>
+						</Button> */}
+						<Link
+							href="/home/upload-images"
+							className="w-full block text-center bg-[#FA8420] text-[#F3EDE9] font-medium py-3 px-4 rounded-lg hover:bg-[#e26e12] transition-colors"
+						>
+							Log in
+						</Link>
 
 						<Button
 							size="lg"
