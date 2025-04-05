@@ -24,7 +24,7 @@ export default function HomePage() {
 						/>
 
 						<h1 className="text-3xl font-bold tracking-tight text-[#7888A3]">
-							Welcome to Bouldre, Your AI-Powered Climbing Path Finder
+							Welcome to Bouldre - Find Your Way to the Top
 						</h1>
 
 						{/* <Button
@@ -36,8 +36,8 @@ export default function HomePage() {
 							Log in
 						</Button> */}
 						<Link
-							href="/home/upload-images"
-							className="w-full block text-center bg-[#FA8420] text-[#F3EDE9] font-medium py-3 px-4 rounded-lg hover:bg-[#e26e12] transition-colors"
+							href="/home/climb"
+							className="w-full block text-center bg-[#FA8420] text-white font-medium py-3 px-4 rounded-lg hover:bg-[#e26e12] transition-colors"
 						>
 							Log in
 						</Link>

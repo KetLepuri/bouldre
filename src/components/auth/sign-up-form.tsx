@@ -4,8 +4,10 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export function SignUpForm({ onBack }: { onBack: () => void }) {
+	const router = useRouter();
 	const [formData, setFormData] = useState({
 		name: "",
 		email: "",
@@ -32,7 +34,7 @@ export function SignUpForm({ onBack }: { onBack: () => void }) {
 		const data = await res.json();
 		if (res.ok) {
 			localStorage.setItem("userId", data.id);
-			// Redirect or state update if needed
+			router.push("/home/upload-images");
 		} else {
 			alert("Failed to sign up");
 		}
@@ -46,7 +48,7 @@ export function SignUpForm({ onBack }: { onBack: () => void }) {
 					type="button"
 					onClick={onBack}
 					size="icon"
-					className="absolute top-4 left-4 bg-[#FA8420] hover:bg-[#e26e12] text-white"
+					className="absolute rounded-3xl top-4 left-4 bg-[#FA8420] hover:bg-[#e26e12] text-white"
 				>
 					<ArrowLeft className="w-5 h-5" />
 				</Button>
@@ -93,6 +95,15 @@ export function SignUpForm({ onBack }: { onBack: () => void }) {
 					</select>
 					<input
 						type="number"
+						name="age"
+						placeholder="Age"
+						required
+						onChange={handleChange}
+						className="w-full p-3 border border-[#DCDCDC] bg-white text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FA8420]"
+					/>
+
+					<input
+						type="number"
 						name="apeIndex"
 						placeholder="Ape Index"
 						required
@@ -127,14 +138,14 @@ export function SignUpForm({ onBack }: { onBack: () => void }) {
 
 			{/* Right side: image_2 */}
 			<div className="hidden md:block relative w-[400px] h-auto">
-                            <Image
-                                src="/images/image_1.jpg"
-                                alt="Login Visual"
-                                fill
-                                className="object-cover rounded-r-2xl"
-                            />
-                             <div className="absolute inset-0 bg-[#FA8420]/20 rounded-r-2xl" />
-                        </div>
+				<Image
+					src="/images/image_1.jpg"
+					alt="Login Visual"
+					fill
+					className="object-cover rounded-r-2xl"
+				/>
+				<div className="absolute inset-0 bg-[#FA8420]/20 rounded-r-2xl" />
+			</div>
 		</div>
 	);
 }

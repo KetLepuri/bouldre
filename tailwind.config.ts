@@ -7,10 +7,8 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        border: "rgb(var(--sidebar-border) / <alpha-value>)",
-        background: "rgb(var(--sidebar) / <alpha-value>)",
-        foreground: "rgb(var(--sidebar-foreground) / <alpha-value>)",
+      height: {
+        screen: "100vh",
       },
     },
   },
