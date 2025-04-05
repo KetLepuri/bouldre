@@ -72,7 +72,7 @@ export default function StepGenerate({
 
       const userParams = JSON.parse(localStorage.getItem("userParams") || "{}");
 
-      const genRes = await fetch("/api/generate-path", {
+      const genRes = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, wallId, userParams }),
@@ -90,7 +90,7 @@ export default function StepGenerate({
       onNext();
     } catch (err) {
       console.error(err);
-      showModal("Unexpected Error", "Something went wrong during generation");
+      showModal("Upss...", "Something went wrong during generation! Please try again.");
     } finally {
       setGenerating(false);
     }

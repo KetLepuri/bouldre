@@ -56,23 +56,21 @@ export default function Navbar() {
 					{/* Desktop Navigation */}
 					<NavigationMenu className="hidden md:flex gap-6 items-center">
 						<NavigationMenuList className="flex items-center gap-6">
-							{["upload-images", "wall-images", "gallery"].map(
-								(route, index) => (
-									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-									<NavigationMenuItem key={index}>
-										<Link
-											href={`/home/${route}`}
-											className="text-sm text-gray-700 border-b-2 border-transparent hover:border-[#fa842072] hover:text-[#FA8420] transition-all duration-200 pb-1"
-										>
-											{route === "upload-images"
-												? "Upload"
-												: route === "wall-images"
-													? "Walls"
-													: "Gallery"}
-										</Link>
-									</NavigationMenuItem>
-								),
-							)}
+							{["climb", "gallery", "about"].map((route, index) => (
+								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+								<NavigationMenuItem key={index}>
+									<Link
+										href={`/home/${route}`}
+										className="text-sm text-gray-700 border-b-2 border-transparent hover:border-[#fa842072] hover:text-[#FA8420] transition-all duration-200 pb-1"
+									>
+										{route === "climb"
+											? "Upload"
+											: route === "gallery"
+												? "Gallery"
+												: "About"}
+									</Link>
+								</NavigationMenuItem>
+							))}
 							<NavigationMenuItem>
 								<div className="flex items-center gap-2">
 									<UserProfile />
@@ -128,23 +126,21 @@ export default function Navbar() {
 
 								{/* Mobile Navigation Links */}
 								<nav className="flex flex-col text-center mt-4">
-									{["upload-images", "wall-images", "galley"].map(
-										(route, index) => (
-											<Link
-												// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-												key={index}
-												href={`/home/${route}`}
-												className="text-sm text-gray-700 py-3 border-b border-[#e4dcd8] hover:text-[#FA8420] hover:border-[#fa842045] transition-all font-medium"
-												onClick={() => setMenuOpen(false)}
-											>
-												{route === "upload-images"
-													? "Upload"
-													: route === "wall-images"
-														? "Walls"
-														: "Gallery"}
-											</Link>
-										),
-									)}
+									{["climb", "gallery", "about"].map((route, index) => (
+										<Link
+											// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+											key={index}
+											href={`/home/${route}`}
+											className="text-sm text-gray-700 py-3 border-b border-[#e4dcd8] hover:text-[#FA8420] hover:border-[#fa842045] transition-all font-medium"
+											onClick={() => setMenuOpen(false)}
+										>
+											{route === "climb"
+												? "Upload"
+												: route === "gallery"
+													? "Gallery"
+													: "About"}
+										</Link>
+									))}
 
 									{/* User Profile */}
 									{userData && (
@@ -155,7 +151,6 @@ export default function Navbar() {
 													alt="User Avatar"
 													width={32}
 													height={32}
-													
 												/>
 												<div className="flex flex-col text-left">
 													<span className="text-sm font-semibold text-[#FA8420]">

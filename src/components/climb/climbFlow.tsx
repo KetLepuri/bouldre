@@ -71,7 +71,7 @@ export default function ClimbFlow() {
 						<div
 							// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 							key={i}
-							className={`relative z-5 p-1.5 mx-3 text-center text-sm font-medium border rounded-3xl transition-all ${
+							className={`relative z-5 pl-2.5 pr-2.5 mx-3 text-center text-sm font-medium border rounded-3xl transition-all ${
 								isCompleted || isActive
 									? "bg-[#FA8420] text-white border-[#FA8420]"
 									: "bg-white text-[#5f6b80] border-dashed border-[#FA8420]"

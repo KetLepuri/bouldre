@@ -29,7 +29,7 @@ export default function StepDisplay({ imageUrl, onRestart, showModal }: StepDisp
 
     const generate = async () => {
       try {
-        const genRes = await fetch("/api/generate-path", {
+        const genRes = await fetch("/api/ai", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId, wallId, imageUrl }),
