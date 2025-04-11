@@ -2,23 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-	User,
-	X,
-	Mail,
-	Ruler,
-	Footprints,
-	Hand,
-	Venus,
-	Mars,
-	Pencil,
-	Trash2,
-	LogOut,
-	Check,
+	User, X, Mail, Pencil, Trash2, LogOut, Check, Venus, Mars,
 } from "lucide-react";
 import { LiaUserClockSolid } from "react-icons/lia";
 import { PiPersonArmsSpreadThin } from "react-icons/pi";
-import { Button } from "@/components/ui/button";
 import { GiBodyHeight, GiLeg } from "react-icons/gi";
+import { Button } from "@/components/ui/button";
 import ConfirmModal from "./popUp-box";
 
 export default function UserProfile() {
@@ -31,6 +20,7 @@ export default function UserProfile() {
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
 	const modalRef = useRef<HTMLDivElement>(null);
 
+	// Load user profile + sync localStorage
 	useEffect(() => {
 		const userId = localStorage.getItem("userId");
 		if (!userId) return;
@@ -39,10 +29,23 @@ export default function UserProfile() {
 			const res = await fetch(`/api/user_profile?id=${userId}`);
 			const data = await res.json();
 			setUserData(data);
+
+			localStorage.setItem(
+				"userParams",
+				JSON.stringify({
+					age: Number(data.age),
+					height: Number(data.height),
+					apeIndex: Number(data.apeIndex),
+					legRatio: Number(data.legRatio),
+					sex: data.sex,
+				}),
+			);
 		}
+
 		fetchUserData();
 	}, []);
 
+	// Close modal on outside click
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
@@ -56,32 +59,57 @@ export default function UserProfile() {
 		};
 	}, []);
 
+	// Handle profile edit save
 	const handleSave = async () => {
-		if (!editingField || !editValue) return;
+		if (!editingField || editValue === "") return;
+
+		const userId = localStorage.getItem("userId");
+		if (!userId) return;
+
+		const numericFields = ["height", "apeIndex", "legRatio", "age"];
+		const parsedValue = numericFields.includes(editingField)
+			? Number(editValue)
+			: editValue;
+
 		const res = await fetch("/api/user_profile", {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
-				id: localStorage.getItem("userId"),
+				id: userId,
 				field: editingField,
-				value: editValue,
+				value: parsedValue,
 			}),
 		});
+
 		if (res.ok) {
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			setUserData((prev: any) => ({ ...prev, [editingField]: editValue }));
+			const updated = { ...userData, [editingField]: parsedValue };
+			setUserData(updated);
 			setEditingField(null);
 			setEditValue("");
+
+			localStorage.setItem(
+				"userParams",
+				JSON.stringify({
+					age: Number(updated.age),
+					height: Number(updated.height),
+					apeIndex: Number(updated.apeIndex),
+					legRatio: Number(updated.legRatio),
+					sex: updated.sex,
+				}),
+			);
 		} else {
 			alert("Failed to update field");
 		}
 	};
 
+	// Log out
 	const handleLogout = () => {
 		localStorage.removeItem("userId");
+		localStorage.removeItem("userParams");
 		window.location.href = "/";
 	};
 
+	// Delete user
 	const handleDelete = async () => {
 		const res = await fetch("/api/user_profile", {
 			method: "DELETE",
@@ -91,6 +119,7 @@ export default function UserProfile() {
 
 		if (res.ok) {
 			localStorage.removeItem("userId");
+			localStorage.removeItem("userParams");
 			window.location.href = "/";
 		} else {
 			alert("Failed to delete profile");
@@ -128,7 +157,7 @@ export default function UserProfile() {
 						ref={modalRef}
 						className={`${
 							showFullScreen
-								? " p-6 max-h-[75vh] overflow-y-auto"
+								? "p-6 max-h-[75vh] overflow-y-auto"
 								: "rounded-xl p-4 w-80"
 						} border border-gray-200`}
 					>
@@ -139,12 +168,16 @@ export default function UserProfile() {
 									variant="ghost"
 									size="icon"
 									className="text-[#FA8420] rounded-full"
-								/>
+								>
+									<X className="w-4 h-4" />
+								</Button>
 							</div>
 						)}
+
 						<h3 className="text-lg font-semibold text-[#7888A3] mb-4 text-center md:text-left">
 							{userData?.name || "User"}&apos;s Profile
 						</h3>
+
 						<div className="space-y-2 text-sm text-[#5f6b80]">
 							{[
 								"name",
@@ -164,6 +197,7 @@ export default function UserProfile() {
 									height: `${userData?.height || ""}`,
 									legRatio: `${userData?.legRatio || ""}`,
 								};
+
 								const iconMap: Record<string, JSX.Element> = {
 									name: <User className="text-[#FA8420] w-4 h-4" />,
 									email: <Mail className="text-[#FA8420] w-4 h-4" />,
@@ -175,6 +209,7 @@ export default function UserProfile() {
 									height: <GiBodyHeight className="text-[#FA8420] w-4 h-4" />,
 									legRatio: <GiLeg className="text-[#FA8420] w-4 h-4" />,
 								};
+
 								return (
 									<div
 										// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
@@ -195,13 +230,14 @@ export default function UserProfile() {
 													{field === "apeIndex"
 														? `Ape Index: ${labelMap[field]}`
 														: field === "height"
-															? `Height: ${labelMap[field]} cm`
-															: field === "legRatio"
-																? `Leg Ratio: ${labelMap[field]}`
-																: labelMap[field]}
+														? `Height: ${labelMap[field]} cm`
+														: field === "legRatio"
+														? `Leg Ratio: ${labelMap[field]}`
+														: labelMap[field]}
 												</span>
 											)}
 										</div>
+
 										{editingField === field ? (
 											<Check
 												className="w-4 h-4 text-[#FA8420] cursor-pointer ml-2"
@@ -220,6 +256,7 @@ export default function UserProfile() {
 								);
 							})}
 						</div>
+
 						<div className="pt-4 flex gap-2">
 							<Button
 								onClick={() => setShowConfirmModal(true)}
@@ -240,6 +277,7 @@ export default function UserProfile() {
 					</div>
 				</div>
 			)}
+
 			{showConfirmModal && (
 				<ConfirmModal
 					title="Delete Profile"

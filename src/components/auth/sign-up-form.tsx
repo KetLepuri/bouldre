@@ -34,7 +34,7 @@ export function SignUpForm({ onBack }: { onBack: () => void }) {
 		const data = await res.json();
 		if (res.ok) {
 			localStorage.setItem("userId", data.id);
-			router.push("/home/upload-images");
+			router.push("/home/climb");
 		} else {
 			alert("Failed to sign up");
 		}

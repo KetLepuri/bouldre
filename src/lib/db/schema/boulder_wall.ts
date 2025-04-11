@@ -4,13 +4,10 @@ import { users } from "./user";
 export const boulderWall = pgTable("boulder_wall", {
 	id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 	name: text("name"),
-	width: real("width"),
-	height: real("height"),
-	holdHandNumber: integer("holdHandNumber"),
-	holdFootNumber: integer("holdFootNumber"),
+	imageWidth: integer("imageWidth"), 
+	imageHeight: integer("imageHeight"),
 	holdType: text("holdType"),
-	wallInclination: text("wallInclination"),
 	image_url: text("image_url").notNull(),
-	created_at: timestamp("created_at").defaultNow(),
 	user_id: text("user_id").references(() => users.id),
-}); 
+	created_at: timestamp("created_at").defaultNow(),
+});
