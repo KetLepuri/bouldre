@@ -87,12 +87,14 @@ export default function ClimbFlow() {
 			<div className="w-full max-w-xl">
 				{step === 0 && (
 					<StepUpload
-						onUploadComplete={(url) => {
-							setImageUrl(url);
-							goNext();
-						}}
-						showModal={(title, message) => setInfoModal({ title, message })}
-					/>
+					onUploadComplete={({ imageUrl, layout, wallId }) => {
+					  localStorage.setItem("layout", layout);
+					  localStorage.setItem("wallId", wallId); 
+					  setImageUrl(imageUrl);
+					  goNext();
+					}}
+					showModal={(title, message) => setInfoModal({ title, message })}
+				  />
 				)}
 				{step === 1 && (
 					<StepGenerate

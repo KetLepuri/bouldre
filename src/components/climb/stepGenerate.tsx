@@ -13,6 +13,7 @@ type StepGenerateProps = {
 	showModal: (title: string, message: string, onConfirm?: () => void) => void;
 };
 
+
 export default function StepGenerate({
 	imageUrl,
 	onNext,
@@ -22,86 +23,45 @@ export default function StepGenerate({
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [generating, setGenerating] = useState(false);
 	const [isZoomed, setIsZoomed] = useState(false);
+	const [routeData, setRouteData] = useState(null);
 
 	const handleGeneratePath = async () => {
-		if (!imageUrl) return;
 		setGenerating(true);
 
 		try {
 			const userId = localStorage.getItem("userId");
-			const wallId = `wall-${crypto.randomUUID()}`;
-			localStorage.setItem("wallId", wallId);
-
-			// 1. Send to FastAPI for hold detection
-			const formData = new FormData();
-			formData.append("image_url", imageUrl);
-			formData.append("wall_id", wallId);
-			formData.append("user_id", userId || "");
-
-			const detectRes = await fetch("http://localhost:8000/detect/", {
-				method: "POST",
-				body: formData,
-			});
-
-			const { holds, meta, message, error } = await detectRes.json();
-
-			if (!detectRes.ok || !holds?.length) {
-				showModal(
-					"Detection Failed",
-					error || message || "Hold detection failed",
-				);
-				setGenerating(false);
-				return;
-			}
-
-			// 2. Format wall metadata to match your DB schema
-			const formattedMeta = {
-				id: wallId,
-				name: `Auto Wall ${wallId.slice(-4)}`,
-				imageWidth: Number(meta.imageWidth),
-				imageHeight: Number(meta.imageHeight),
-				holdType: "auto-detected",
-				image_url: meta.image_url,
-				user_id: userId,
-				created_at: new Date(),
-			};
-
-			// 3. Save wall details to PostgreSQL
-			await fetch("/api/wall-details", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(formattedMeta),
-			});
-
+			const wallId = localStorage.getItem("wallId");
 			const userParams = JSON.parse(localStorage.getItem("userParams") || "{}");
 			const difficulty = "easy";
-
+	
 			const genRes = await fetch("/api/ai", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ userId, wallId, userParams, difficulty }),
+				body: JSON.stringify({
+					userId,
+					wallId, 
+					userParams,
+					difficulty,
+				}),
 			});
 
 			const pathData = await genRes.json();
+			setRouteData(pathData);
 
 			if (!genRes.ok || !pathData.route?.length) {
 				showModal(
 					"No route generated",
-					pathData.error || "Upss..! Please click the button and try again.",
+					pathData.error || "Oops... Please click the button and try again.",
 				);
 				setGenerating(false);
 				return;
 			}
 
-			// 6. Store route and move forward
 			localStorage.setItem("aiGeneratedPath", JSON.stringify(pathData));
 			onNext();
 		} catch (err) {
 			console.error(err);
-			showModal(
-				"Upss...",
-				"Something went wrong during generation! Please try again.",
-			);
+			showModal("Oops...", "Something went wrong during generation!");
 		} finally {
 			setGenerating(false);
 		}
@@ -126,7 +86,7 @@ export default function StepGenerate({
 
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<div
-					className="relative mb-4 w-full max-w-md aspect-[3/4] rounded-lg overflow-hidden shadow-md cursor-zoom-in"
+					className="relative mb-4 w-full max-w-md aspect-[3/4] rounded-lg overflow-hidden shadow-md cursor-zoom-in md:cursor-pointer"
 					onClick={() => setIsZoomed(true)}
 				>
 					<Image
@@ -161,7 +121,7 @@ export default function StepGenerate({
 				</div>
 
 				<Button
-					className="w-full bg-[#FA8420] hover:bg-[#e26e12] text-white font-medium py-3 rounded-xl"
+					className="w-full max-w-md bg-[#FA8420] hover:bg-[#e26e12] text-white font-medium py-3 rounded-xl text-sm sm:text-base"
 					onClick={handleGeneratePath}
 					disabled={generating}
 				>
@@ -179,16 +139,15 @@ export default function StepGenerate({
 			{isZoomed && (
 				// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 				<div
-					className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center cursor-zoom-out"
+					className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center cursor-zoom-out overflow-auto"
 					onClick={() => setIsZoomed(false)}
 				>
-					<div className="relative max-w-[90%] max-h-[90%]">
+					<div className="relative w-[90vw] max-w-[500px] aspect-[3/4]">
 						<Image
 							src={imageUrl}
-							alt="Zoomed Climbing Wall"
-							width={900}
-							height={1200}
-							className="object-contain rounded-lg shadow-lg"
+							alt="Zoomed Wall"
+							fill
+							className="object-contain"
 						/>
 					</div>
 				</div>
