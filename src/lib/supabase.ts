@@ -12,7 +12,6 @@ export async function uploadImage(file: File, p0: string) {
     const fileExt = file.name.split(".").pop();
     const filePath = `uploads/${Date.now()}.${fileExt}`;
 
-    // Convert File to Blob (Required for browser uploads)
     const arrayBuffer = await file.arrayBuffer();
     const blob = new Blob([arrayBuffer], { type: file.type });
 
@@ -25,7 +24,6 @@ export async function uploadImage(file: File, p0: string) {
       throw error;
     }
 
-    // Get Public URL of uploaded image
     const { data: publicUrlData } = supabase.storage.from("image-uploads").getPublicUrl(filePath);
 
     return { url: publicUrlData.publicUrl, path: filePath };

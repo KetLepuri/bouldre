@@ -31,13 +31,13 @@ export async function POST(req: Request) {
 		const getColor = (limb: string) => {
 			switch (limb) {
 				case "leftFoot":
-					return "#f28916"; // orange
+					return "#fc880a"; // orange
 				case "rightFoot":
-					return "#04c217"; 
+					return "#04bf05"; 
 				case "leftHand":
-					return "#f7c245"; 
+					return "#9d38eb"; // purple
 				case "rightHand":
-					return "#00e1ed"; // cyan
+					return "#07aef0"; // cyan
 				default:
 					return "#AAAAAA"; // fallback
 			}

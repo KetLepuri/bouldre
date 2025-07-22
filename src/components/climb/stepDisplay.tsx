@@ -38,7 +38,6 @@ export default function StepDisplay({
 
 		setInstructions(pathData.instructions || "");
 
-		// Fetch SVG overlay from backend
 		const generateOverlay = async () => {
 			try {
 				const layout = {
@@ -105,7 +104,7 @@ export default function StepDisplay({
 			localStorage.setItem("aiGeneratedPath", JSON.stringify(newPathData));
 			setInstructions(newPathData.instructions);
 	
-			// Re-generate the overlay
+			
 			const layout = {
 				gridCols: 47,
 				gridRows: 35,
@@ -166,7 +165,7 @@ export default function StepDisplay({
 
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<div
-					className="relative w-full aspect-[47/50]"
+					className="relative w-full aspect-[17/20] "
 					onClick={() => setIsZoomed(true)}
 				>
 					<Image
@@ -227,7 +226,7 @@ export default function StepDisplay({
 					className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center cursor-zoom-out overflow-auto"
 					onClick={() => setIsZoomed(false)}
 				>
-					<div className="relative w-[90vw] max-w-[500px] aspect-[3/4]">
+					<div className="relative w-[90vw] max-w-[500px] aspect-[2/4]">
 						<Image
 							src={imageUrl}
 							alt="Zoomed Wall"

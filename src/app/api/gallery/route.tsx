@@ -12,7 +12,6 @@ export async function GET() {
 			return NextResponse.json({ error: error.message }, { status: 500 });
 		}
 
-		// Return array of { name, url }
 		const images = files
 			.filter(
 				(file) => file.name && file.metadata?.mimetype?.startsWith("image"),
@@ -37,6 +36,3 @@ export async function GET() {
 		);
 	}
 }
-
-
-

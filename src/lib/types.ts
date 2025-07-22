@@ -1,4 +1,4 @@
-// lib/types.ts
+
 export type Hold = {
     x: number;
     y: number;

@@ -4,7 +4,6 @@ export const pinecone = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY || "",
 });
 
-// ✅ Ensure the Pinecone index is created with 1536 dimensions
 export async function initializePinecone() {
   const indexName = "wall-search";
 
@@ -14,8 +13,8 @@ export async function initializePinecone() {
     
     await pinecone.createIndex({
       name: indexName,
-      dimension: 1536, // ✅ Ensure it matches OpenAI embeddings size
-      metric: "cosine", // "cosine" is better for embeddings
+      dimension: 1536, 
+      metric: "cosine", 
       spec: {
         serverless: {
           cloud: "aws",
